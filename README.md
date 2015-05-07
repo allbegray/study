@@ -3,9 +3,9 @@
 
 # node.js
 
-1. http://nodejs.org/download 에서 Windows Installer (.msi) 파일 다운로드 후 설치
-2. hello.js 파일 생성
-2-1. 파일의 소스코드
+1. http://nodejs.org/download 에서 Windows Installer (.msi) 파일 다운로드 후 설치  
+2. hello.js 파일 생성  
+2-1. 파일의 소스코드  
 ```
 var http = require('http');
 
