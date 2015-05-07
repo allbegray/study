@@ -22,9 +22,8 @@ public class JsonTest {
 	}
 	
 	private static Object returnJson(Object object) {
-		// TODO : json �����
 		if (object.equals(null)) {
-			System.out.println("���� ���� null �Դϴ�.");
+			System.out.println("들어온 값이 null 입니다.");
 			return object;
 		}
 		
