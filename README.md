@@ -17,6 +17,7 @@
 	
 	server.listen(8080);
 	
+	2-2. 코드 설명
 	var http = require('http'); // Node.js에 기본으로 포함된 http 모듈을 읽어 들인 후 http 라는 변수를 생성
 	
 	// http 모듈에 있는 createServer 함수 호출하여 listen 함수가 있는 객체를 받아온다.
