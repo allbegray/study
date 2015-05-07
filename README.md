@@ -6,7 +6,7 @@
 	1. http://nodejs.org/download 에서 Windows Installer (.msi) 파일 다운로드 후 설치
 	2. hello.js 파일 생성
 	2-1. 파일의 소스코드
-	'''
+	````
 	var http = require('http');
 
 	var server = http.createServer(function (request, response) { 
@@ -16,7 +16,7 @@
 	});
 	
 	server.listen(8080);
-	'''
+	````
 	var http = require('http'); // Node.js에 기본으로 포함된 http 모듈을 읽어 들인 후 http 라는 변수를 생성
 	
 	// http 모듈에 있는 createServer 함수 호출하여 listen 함수가 있는 객체를 받아온다.
