@@ -16,6 +16,13 @@
 	
 	<dependencies>
 	
+		<!-- activemq -->
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-core</artifactId>
+			<version>5.7.0</version>
+		</dependency>
+	
 		<!-- servlet -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
