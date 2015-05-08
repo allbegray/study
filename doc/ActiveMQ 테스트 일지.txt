@@ -1,0 +1,259 @@
+http://activemq.apache.org/download.html 다운
+
+
+압축 풀고 mq 실행
+윈도우 64 비트를 사용하기 때문에
+bin/win64/activemq.bat 로 실행 주의
+
+
+로그중 중요해 보이는 정보
+
+jvm 1    |  INFO | ActiveMQ WebConsole available at http://0.0.0.0:8161/
+
+
+
+
+웹 콘솔 접속 되는지 확인
+http://localhost:8161/
+
+
+
+헬로우 월드 작성
+
+activemq java example 로 키워드 검색
+
+!책발견 http://www.manning.com/snyder/AMQiASample-Ch7.pdf
+
+예제 정보
+http://activemq.apache.org/hello-world.html
+http://www.coderpanda.com/jms-example-using-apache-activemq/
+http://java.dzone.com/articles/jms-activemq
+http://www.pretechsol.com/2013/08/jms-with-activemq-example.html#.VUwnipOBulo
+
+
+개념 흐름도
+
+prosumer (생산자)
+커넥션(ConnectionFactory)을 맺고 -> 세션(Session) 생성 -> destination(큐생성) 생성  -> prosumer 객체 생성 -> 메시지 송신
+
+consumer (소비자))
+커넥션을 맺고 -> 세션생성 -> destination 큐 연결 -> consumer 객체 생성 -> 메시지 수신
+
+
+검증 사항
+1. 메시지 송신은 어느 객체든 상관이 없나? 텍스트만 되는것인가?
+2. 메시지 수신은 무한루프?
+3. 수신하다가 에러 나면 큐에서 사라지나?
+
+
+
+<dependency>
+	<groupId>org.apache.activemq</groupId>
+	<artifactId>activemq-core</artifactId>
+	<version>5.7.0</version>
+</dependency>
+
+
+
+테스트 해보기
+
+package com.jo.mq;
+
+import org.apache.activemq.ActiveMQConnectionFactory;
+
+import javax.jms.Connection;
+import javax.jms.DeliveryMode;
+import javax.jms.Destination;
+import javax.jms.ExceptionListener;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+ 
+/**
+ * Hello world!
+ */
+public class App {
+ 
+    public static void main(String[] args) throws Exception {
+        thread(new HelloWorldProducer(), false);
+        thread(new HelloWorldProducer(), false);
+        thread(new HelloWorldConsumer(), false);
+        Thread.sleep(1000);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldProducer(), false);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldProducer(), false);
+        Thread.sleep(1000);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldProducer(), false);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldProducer(), false);
+        thread(new HelloWorldProducer(), false);
+        Thread.sleep(1000);
+        thread(new HelloWorldProducer(), false);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldProducer(), false);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldProducer(), false);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldProducer(), false);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldConsumer(), false);
+        thread(new HelloWorldProducer(), false);
+    }
+ 
+    public static void thread(Runnable runnable, boolean daemon) {
+        Thread brokerThread = new Thread(runnable);
+        brokerThread.setDaemon(daemon);
+        brokerThread.start();
+    }
+ 
+    public static class HelloWorldProducer implements Runnable {
+        public void run() {
+            try {
+                // Create a ConnectionFactory
+                ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://localhost");
+ 
+                // Create a Connection
+                Connection connection = connectionFactory.createConnection();
+                connection.start();
+ 
+                // Create a Session
+                Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+ 
+                // Create the destination (Topic or Queue)
+                Destination destination = session.createQueue("TEST.FOO");
+ 
+                // Create a MessageProducer from the Session to the Topic or Queue
+                MessageProducer producer = session.createProducer(destination);
+                producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+ 
+                // Create a messages
+                String text = "Hello world! From: " + Thread.currentThread().getName() + " : " + this.hashCode();
+                TextMessage message = session.createTextMessage(text);
+ 
+                // Tell the producer to send the message
+                System.out.println("Sent message: "+ message.hashCode() + " : " + Thread.currentThread().getName());
+                producer.send(message);
+ 
+                // Clean up
+                session.close();
+                connection.close();
+            }
+            catch (Exception e) {
+                System.out.println("Caught: " + e);
+                e.printStackTrace();
+            }
+        }
+    }
+ 
+    public static class HelloWorldConsumer implements Runnable, ExceptionListener {
+        public void run() {
+            try {
+ 
+                // Create a ConnectionFactory
+                ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://localhost");
+ 
+                // Create a Connection
+                Connection connection = connectionFactory.createConnection();
+                connection.start();
+ 
+                connection.setExceptionListener(this);
+ 
+                // Create a Session
+                Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+ 
+                // Create the destination (Topic or Queue)
+                Destination destination = session.createQueue("TEST.FOO");
+ 
+                // Create a MessageConsumer from the Session to the Topic or Queue
+                MessageConsumer consumer = session.createConsumer(destination);
+ 
+                // Wait for a message
+                Message message = consumer.receive(1000);
+ 
+                if (message instanceof TextMessage) {
+                    TextMessage textMessage = (TextMessage) message;
+                    String text = textMessage.getText();
+                    System.out.println("Received: " + text);
+                } else {
+                    System.out.println("Received: " + message);
+                }
+ 
+                consumer.close();
+                session.close();
+                connection.close();
+            } catch (Exception e) {
+                System.out.println("Caught: " + e);
+                e.printStackTrace();
+            }
+        }
+ 
+        public synchronized void onException(JMSException ex) {
+            System.out.println("JMS Exception occured.  Shutting down client.");
+        }
+    }
+}
+
+
+
+
+1. 메모리에서 실행하는 방법(쿼츠 스케줄러의 메모리 방식 처럼)도 있다.
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://localhost");
+
+2. 송신시 javax.jms.Message 인터페이스를 상속받은 녀석들만 전송이 된다.
+
+3. ObjectMessage 로 오브젝트를 전송 가능한데 해당 오브젝트는 반드시 Serializable 를 상속 받아야 한다.
+
+4. 하나의 큐라 하더라도, 어떠한 메시지든 넣고 뺄 수 있으며 instanceof 로 메시지의 타입을 정확히 캐스팅 해야 한다.
+   (하나의 큐에는 하나의 메시지만 보내도록 설계를 해야 할 것이다.)
+
+   
+   
+   
+   
+   
+   
+이젠 스프링으로 올려보자.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+** 2016년 01 월 03 일
+조현행 대리가 테스트 할떄는 버전이 5.0 대 버전이었다.
+현재는 6.0이고 API 는 요래요래 변경 되었다.
+
+변경된 내용
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
